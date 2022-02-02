@@ -19,12 +19,12 @@
 <body>
 <h1>The Caps Game</h1>
 <p>Guess how many caps the player has. B&I Lions caps count.<br><br>You lose a point for every cap you were away from the right answer. The objective is to get the most guesses by the time you have zero points.
-</p><br><br>
+</p><br>
 <div id="gameArea">
 <p><span style="font-weight:bold" id="pointsRemaining">100</span> points remaining</p>
 </div>
 <p><span id="playerName">Player name will appear here.</span></p>
-
+<br>
 <p>
 <button style="width:100%" id="startButton" onclick="startGame()">Play!</button>
 <input type="text" id="capsGuess" style="display:none; width:100%;" placeholder="How many caps did they have?" onkeydown="search(this)">
@@ -56,6 +56,7 @@ function guessMade(guess){
     points = 0;
   }
   scoreString = scoreString + " ➡️ " + points
+  navigator.clipboard.writeText(scoreString);
   document.getElementById('pointsRemaining').innerHTML = points;
   var tag = document.createElement("p");
   var text = document.createTextNode(players[turn][0] + " had " + caps + " caps. Your guess was " + guess.value + " which means you lose " + difference + " points.");
@@ -64,7 +65,7 @@ function guessMade(guess){
   var element = document.getElementById("gameArea");
   element.appendChild(tag);
   ++turn;
-  if (turn > 4 || points <= 0){
+  if (turn > 9 || points <= 0){
     endGame(turn);
 
   }
@@ -91,7 +92,7 @@ function endGame(score){
 
 function share(scoreString){
   navigator.clipboard.writeText(scoreString);
-  alert("Score copied to clipboard");
+  alert(scoreString + " copied to clipboard");
 }
 
 
@@ -143,7 +144,6 @@ base(tableName).select({
 	if (err) { console.error(err); return; }
   });
 }
-console.log(players)
 
 
 window.onload = (e) => {
