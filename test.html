@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <script type="text/javascript" src="airtable.js"></script>
+
+
+</head>
+
+<body>
+
+<script>
+
+let fetched = [];
+
+// Create a list of players
+players = []
+
+let update = () => {
+
+let Airtable = require('airtable');
+let base = new Airtable({apiKey: 'keyhKUS2JTh4kuEU0'}).base('appxL0gnSulB7TVYw');
+let tableName = "Table 1";
+let fieldNames = ["Name","Caps","Country"];
+let max = 10;
+
+fetched = [];
+let resultsTable = document.getElementById("results");
+
+
+base(tableName).select({
+	maxRecords: max,
+	view: "Grid view"
+}).eachPage(function page(records, fetchNextPage) {
+
+  // This function (`page`) will get called for each page of records.
+
+	records.forEach(function(record) {
+
+    tempArray = []
+    for (let field of fieldNames){
+      tempArray.push(record.get(field));
+    }
+    players.push(tempArray);
+	});
+
+
+
+}, function done(err) {
+	if (err) { console.error(err); return; }
+  });
+}
+console.log(players)
+
+
+window.onload = (e) => {
+	update();
+}
+
+</script>
+</body>
+
+</html>

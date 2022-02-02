@@ -1,0 +1,148 @@
+<html>
+<head>
+  <title>The Caps Game</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Dongle:wght@300;400;700&display=swap');
+  </style>
+  <script type="text/javascript" src="airtable.js"></script>
+
+</head>
+<body>
+<h1>The Caps Game</h1>
+<p>Guess how many caps the player has. B&I Lions caps count.<br><br>You lose a point for every cap you were away from the right answer. The objective is to get the most guesses by the time you have zero points.
+</p><br><br>
+<div id="gameArea">
+<p><span style="font-weight:bold" id="pointsRemaining">100</span> points remaining</p>
+</div>
+<p><span id="playerName">Player name will appear here.</span></p>
+
+<p>
+<button style="width:100%" id="startButton" onclick="startGame()">Play!</button>
+<input type="text" id="capsGuess" style="display:none; width:100%;" placeholder="How many caps did they have?" onkeydown="search(this)">
+</p>
+<p><span id="gameOver" style="display:none;"></span></p>
+<p><button style="width:100%;display:none;background-color:#2e2e2e;color:#fff" id="shareButton" onclick="share(scoreString)">Share</button></p>
+<p><span id="mainScore" style="display:none;"></span></p>
+
+<script>
+
+function startGame(){
+    document.getElementById('pointsRemaining').innerHTML = points;
+    document.getElementById('playerName').innerHTML = "How many caps did <b>" + players[turn][0] + " " + players[turn][2] + "</b> have?";
+    document.getElementById('startButton').style.display = "none";
+    document.getElementById('capsGuess').style.display = "inline";
+    document.getElementById("capsGuess").focus();
+}
+
+function guessMade(guess){
+  caps = players[turn][1];
+  var difference = guess.value - caps;
+  difference = difference * difference;
+  difference = Math.sqrt(difference);
+  if (difference > points){
+    difference = points
+  }
+  points = points - difference;
+  if (points < 0){
+    points = 0;
+  }
+  scoreString = scoreString + " ➡️ " + points
+  document.getElementById('pointsRemaining').innerHTML = points;
+  var tag = document.createElement("p");
+  var text = document.createTextNode(players[turn][0] + " had " + caps + " caps. Your guess was " + guess.value + " which means you lose " + difference + " points.");
+  tag.appendChild(text);
+  document.getElementById('capsGuess').value = '';
+  var element = document.getElementById("gameArea");
+  element.appendChild(tag);
+  ++turn;
+  if (turn > 4 || points <= 0){
+    endGame(turn);
+
+  }
+  else{
+    document.getElementById('playerName').innerHTML = "How many caps did <b>" + players[turn][0] + " " + players[turn][2] + "</b> have?";
+  }
+}
+
+function search(ele) {
+    if(event.key === 'Enter') {
+        guessMade(ele);
+
+    }
+}
+
+function endGame(score){
+  document.getElementById('capsGuess').style.display = "none";
+  document.getElementById('playerName').style.display = "none";
+  document.getElementById('gameOver').style.display = "inline";
+  document.getElementById('shareButton').style.display = "inline";
+  document.getElementById('gameOver').innerHTML = "Wonderful! You got to " + turn + " turns!";
+  document.getElementById('mainScore').innerHTML = scoreString;
+}
+
+function share(scoreString){
+  navigator.clipboard.writeText(scoreString)
+  alert("Score copied to clipboard")
+}
+
+
+var scoreString = "100"
+
+var points = 100
+
+var turn = 0
+
+// This part gets the players
+
+let fetched = [];
+
+// Create a list of players
+players = []
+
+let update = () => {
+
+let Airtable = require('airtable');
+let base = new Airtable({apiKey: 'keynbJb5whdFAxqdR'}).base('appC8CEhV9fNbkYC4');
+let tableName = "Table 1";
+let fieldNames = ["Name","Caps","Country"];
+let max = 10;
+
+fetched = [];
+let resultsTable = document.getElementById("results");
+
+
+base(tableName).select({
+	maxRecords: max,
+	view: "Grid view"
+}).eachPage(function page(records, fetchNextPage) {
+
+  // This function (`page`) will get called for each page of records.
+
+	records.forEach(function(record) {
+
+    tempArray = []
+    for (let field of fieldNames){
+      tempArray.push(record.get(field));
+    }
+    players.push(tempArray);
+	});
+
+
+}, function done(err) {
+	if (err) { console.error(err); return; }
+  });
+}
+console.log(players)
+
+
+window.onload = (e) => {
+	update();
+}
+
+
+
+
+</script>
+</body>
+</html>
